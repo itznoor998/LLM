@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorful Pomodoro Timer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f06, #4a90e2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 320px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #ffeb3b;
+        }
+
+        #timer-display {
+            font-size: 60px;
+            margin: 20px 0;
+            color: #ff4081;
+        }
+
+        .controls {
+            margin: 15px 0;
+        }
+
+        .controls button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+        }
+
+        #start-btn {
+            background-color: #4caf50;
+            /* Green */
+            color: white;
+        }
+
+        #pause-btn {
+            background-color: #ff9800;
+            /* Orange */
+            color: white;
+        }
+
+        #reset-btn {
+            background-color: #f44336;
+            /* Red */
+            color: white;
+        }
+
+        .settings {
+            margin-top: 20px;
+            color: #ffeb3b;
+        }
+
+        .settings label {
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .settings input {
+            width: 50px;
+            margin: 0 10px;
+            padding: 5px;
+            border: 2px solid #ff4081;
+            /* Pink */
+            border-radius: 5px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #ffeb3b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Pomodoro Timer</h1>
+        <div id="timer-display">25:00</div>
+        <div class="controls">
+            <button id="start-btn">Start</button>
+            <button id="pause-btn">Pause</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+        <div class="settings">
+            <label for="work-duration">Work (min):</label>
+            <input type="number" id="work-duration" value="25" min="1">
+            <label for="break-duration">Break (min):</label>
+            <input type="number" id="break-duration" value="5" min="1">
+        </div>
+        <div id="status"></div>
+    </div>
+    <script>
+        let workDuration = 25 * 60; // Work duration in seconds  
+        let breakDuration = 5 * 60; // Break duration in seconds  
+        let timer;
+        let isBreak = false;
+        let isPaused = false;
+
+        const timerDisplay = document.getElementById('timer-display');
+        const statusDisplay = document.getElementById('status');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const workInput = document.getElementById('work-duration');
+        const breakInput = document.getElementById('break-duration');
+
+        function updateDisplay(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timerDisplay.textContent = `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function startTimer() {
+            if (isPaused) {
+                isPaused = false;
+                return;
+            }
+
+            timer = setInterval(() => {
+                if (isBreak) {
+                    if (breakDuration > 0) {
+                        breakDuration--;
+                        updateDisplay(breakDuration);
+                    } else {
+                        clearInterval(timer);
+                        isBreak = false;
+                        statusDisplay.textContent = "Time for Work!";
+                        workDuration = parseInt(workInput.value) * 60;
+                        startTimer();
+                    }
+                } else {
+                    if (workDuration > 0) {
+                        workDuration--;
+                        updateDisplay(workDuration);
+                    } else {
+                        clearInterval(timer);
+                        isBreak = true;
+                        statusDisplay.textContent = "Time for Break!";
+                        breakDuration = parseInt(breakInput.value) * 60;
+                        updateDisplay(breakDuration);
+                    }
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isPaused = true;
+            clearInterval(timer);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            isBreak = false;
+            isPaused = false;
+            workDuration = parseInt(workInput.value) * 60;
+            breakDuration = parseInt(breakInput.value) * 60;
+            updateDisplay(workDuration);
+            statusDisplay.textContent = "";
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        // Initialize the display  
+        updateDisplay(workDuration);  
+    </script>
+</body>
+
+</html>
